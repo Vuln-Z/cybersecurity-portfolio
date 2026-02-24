@@ -151,16 +151,6 @@ In my **local SIEM lab**, I've implemented:
 
 ---
 
-## 📸 Screenshots
-
-*(Placeholder – add actual room completion screenshot)*
-
-- [ ] Network Discovery Detection room completed badge
-- [ ] SIEM query showing port scan detection
-- [ ] Elastic Security map of attack timeline
-
----
-
 *Completed as part of SOC Level 1 path. Builds directly on Pyramid of Pain and Cyber Kill Chain knowledge.*
 
 *Next: Apply this detection logic to my own lab with real nmap scans.*
