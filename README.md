@@ -17,7 +17,7 @@ Welcome to my hands-on cybersecurity portfolio. This repository documents my pra
 
 ## 🏆 Highlights
 
-- **TryHackMe:** 60+ rooms completed, SOC L1 track, **100% true positive rate** in simulations
+- **TryHackMe:** 40+ rooms completed, SOC L1 track, **100% true positive rate** in simulations
 - **SIEM Lab:** Dockerized ELK stack with live log ingestion and working detection rules
 - **Detection Engineering:** Written Sigma rules for SSH brute force, PowerShell obfuscation, Pass-the-Hash
 - **Phishing Analysis:** Email forensics, IOC extraction, reporting templates
@@ -43,7 +43,7 @@ Welcome to my hands-on cybersecurity portfolio. This repository documents my pra
 
 ## 📈 Progress
 
-- **TryHackMe:** 60+ rooms, 7-day streak, badges: `soc-sim-100-percent-true-positive-rate`, `terminaled`, `web-fund`
+- **TryHackMe:** 40+ rooms, 7-day streak, badges: `soc-sim-100-percent-true-positive-rate`, `terminaled`, `web-fund`
 - **Certifications:** CompTIA Security+ (studying), Cisco NetAcad Ethical Hacker (in progress)
 - **Current focus:** Windows Event Logs, Sigma rule production, local SIEM deployment
 
