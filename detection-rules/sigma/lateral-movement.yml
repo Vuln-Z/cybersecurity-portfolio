@@ -1,0 +1,73 @@
+---
+title: Pass-the-Hash Lateral Movement Detection
+id: 3c4d5e6f-7a8b-9c0d-1e2f-3a4b5c6d7e8f
+status: experimental
+description: >
+  Detects Pass-the-Hash (PtH) attacks by identifying NTLM-based network logons
+  (Windows Event ID 4624, Logon Type 3) where the source workstation differs
+  from the target. Attackers use PtH to move laterally without knowing plaintext
+  passwords, authenticating directly with NTLM hashes.
+author: VulnZ
+date: 2026-02-23
+modified: 2026-02-23
+references:
+  - https://attack.mitre.org/techniques/T1550.002/
+  - https://docs.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4624
+tags:
+  - attack.lateral_movement
+  - attack.t1550.002
+  - pass_the_hash
+  - windows
+  - authentication
+logsource:
+  product: windows
+  service: security
+detection:
+  selection:
+    EventID: 4624
+    LogonType: 3  # Network logon (SMB, RPC, etc.)
+    AuthenticationPackageName: "NTLM"
+    # Optional: restrict to specific accounts (admins, sensitive users)
+    # TargetUserName|endswith: "$"  # machine accounts
+  filter:
+    # Exclude logons where source and destination are the same host (local processes)
+    SourceWorkstation: "%computername%"
+    # Exclude known legitimate remote services that use NTLM (adjust per environment)
+    # SourceWorkstation: ("BACKUPSERVER" OR "MONITORING01")
+  condition: selection AND NOT filter
+fields:
+  - source.user.name
+  - source.workstation
+  - destination.user.name
+  - destination.host
+  - source.ip
+  - AuthenticationPackageName
+  - LogonType
+  - WorkstationName
+falsepositives:
+  - Legacy applications that only support NTLM authentication
+  - Remote management tools using NTLM (some backup software, monitoring agents)
+  - Service accounts configured for NTLM auth across multiple systems
+  - Print servers accessing remote shares
+level: high
+---
+# Correlation Enhancement
+
+# Combine with Event ID 4688 (process creation) on target to see what command
+# or tool executed after the network logon. Example correlation:
+#
+# 1. Detect PtH logon (4624, NTLM, cross-host)
+# 2. Within 60 seconds, look for process creation where:
+#    - Parent process is a remote session (lsass.exe, services.exe context)
+#    - Command line contains psexec, wmic, Invoke-Command, etc.
+#
+# This reduces false positives by requiring suspicious activity after auth.
+
+# Splunk SPL
+# index=wineventlog EventCode=4624 LogonType=3 AuthenticationPackageName="NTLM"
+# SourceWorkstation!=TargetHostname
+# | table _time, SourceWorkstation, TargetUserName, source.ip
+
+# KQL (ELK)
+# winlog.event_id:4624 AND winlog.logon.type:"Network" AND authentication.package:"NTLM"
+# | where source.workstation != host.name

@@ -1,0 +1,47 @@
+# Local SIEM data
+/logs/
+/elasticsearch-data/
+/kibana-data/
+/logstash-data/
+
+# Credentials
+.env
+credentials.json
+*.key
+*.pem
+secrets/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Backup files
+*.bak
+*.backup
+
+# Log outputs
+*.log
+/outputs/
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# Docker compose override (local only)
+docker-compose.override.yml
+
+# Screenshots (optional – add actual screenshots later)
+# Uncomment if you store raw screenshots in repo
+# screenshots/*.png
+# screenshots/*.jpg

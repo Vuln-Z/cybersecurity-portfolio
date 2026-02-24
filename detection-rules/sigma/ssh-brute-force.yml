@@ -1,0 +1,55 @@
+---
+title: SSH Brute Force Attack
+id: 1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d
+status: experimental
+description: >
+  Detects multiple failed SSH login attempts from a single source IP within a
+  10-minute time window. This pattern indicates automated credential guessing
+  or brute force attacks against SSH services.
+author: VulnZ
+date: 2026-02-23
+modified: 2026-02-23
+references:
+  - https://attack.mitre.org/techniques/T1110/
+  - https://www.ssh.com/academy/ssh/brute-force-attack
+tags:
+  - attack.credential_access
+  - attack.t1110
+  - brute_force
+  - ssh
+  - network
+logsource:
+  product: linux
+  service: auth
+  # For Syslog: facility=auth; For Elastic: dataset=auth.log
+detection:
+  selection:
+    # Example log: "sshd[1234]: Failed password for invalid user test from 192.168.1.100 port 54321 ssh2"
+    Message|contains:
+      - 'Failed password for'
+      - 'Invalid user'
+      # Optional: add 'Connection closed by' for pre-auth disconnects
+  timeframe: 10m
+  condition: selection | count(distinct.Message) by source.ip > 5
+  # Tune threshold: >5 is sensitive; >10 for low-noise environments
+fields:
+  - source.ip
+  - user.name
+  - Message
+  - timestamp
+falsepositives:
+  - Misconfigured automated scripts or backup systems
+  - Legitimate users accidentally typing wrong passwords repeatedly
+  - Vulnerability scanners or compliance audit tools
+  - Centralized management systems connecting with wrong credentials
+level: medium
+---
+# Unit Test Queries (for Sigma validation)
+
+# Test 1: Ensure benign single failure does NOT trigger
+# source.ip: "10.0.0.1" | stats count by source.ip  # should be < 6
+
+# Test 2: Ensure brute force DOES trigger
+# source.ip: "192.168.1.100" | stats count by source.ip  # should be > 5
+
+# Note: Adjust threshold based on environment size (small lab vs enterprise)

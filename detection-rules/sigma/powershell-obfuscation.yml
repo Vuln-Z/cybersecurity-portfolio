@@ -1,0 +1,71 @@
+---
+title: Suspicious PowerShell Encoded Command Execution
+id: 2b3c4d5e-6f7a-8b9c-0d1e-2f3a4b5c6d7e
+status: experimental
+description: >
+  Detects PowerShell process creation with command-line obfuscation flags
+  (-EncodedCommand, -e, -Enc). Attackers frequently use encoded PowerShell
+  commands to bypass command-line logging and avoid detection by simple
+  string-matching defenses.
+author: VulnZ
+date: 2026-02-23
+modified: 2026-02-23
+references:
+  - https://attack.mitre.org/techniques/T1059.001/
+  - https://www.microsoft.com/en-us/security/blog/2021/06/16/analyzing-and-detecting-powershell-attacks/
+tags:
+  - attack.execution
+  - attack.t1059.001
+  - powershell
+  - obfuscation
+  - windows
+logsource:
+  category: process_creation
+  product: windows
+  # Prefer Sysmon Event ID 1 for full command-line capture.
+  # If only Windows Event 4688 available, ensure CommandLine field is populated.
+detection:
+  selection:
+    # -EncodedCommand, -e (short form), or -Enc
+    CommandLine|contains:
+      - '-EncodedCommand'
+      - '-e '
+      - '-Enc '
+      # Also detect -c with base64: powershell -c "[Convert]::FromBase64String(...)"
+      - '-c '
+  filter:
+    # Exclude known benign PowerShell usage (admin scripts, help, updates)
+    CommandLine|contains:
+      - 'Get-Help'
+      - 'Set-ExecutionPolicy'
+      - 'Install-Module'
+      - 'Update-Help'
+      # Exclude Microsoft-signed scripts path (adjust as needed)
+      - '\\Windows\\System32\\WindowsPowerShell\\'
+      - '\\Program Files\\WindowsPowerShell\\'
+  condition: selection AND NOT filter
+fields:
+  - process.name
+  - process.command_line
+  - user.name
+  - host.name
+  - parent_process.name
+falsepositives:
+  - Legitimate administrative scripts that use encoded commands for compliance
+  - Software installers using PowerShell for configuration
+  - Automated monitoring tools with encoded parameters
+  - Dev/DevOps CI/CD pipelines
+level: high
+---
+# KQL for Elastic (ELK)
+
+# event.dataset: "windows_process" AND
+# process.name: "powershell.exe" AND
+# process.command_line: (*-EncodedCommand* OR *-e * OR *-Enc * OR *-c *) AND
+# NOT process.command_line: ("*Get-Help*" OR "*Set-ExecutionPolicy*" OR "*Install-Module*")
+
+# Splunk SPL
+
+# sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=1
+# (CommandLine="*-EncodedCommand*" OR CommandLine="*-e *" OR CommandLine="*-Enc *")
+# NOT (CommandLine="*Get-Help*" CommandLine="*Set-ExecutionPolicy*")

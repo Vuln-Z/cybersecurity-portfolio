@@ -1,0 +1,137 @@
+# Splunk SPL Queries for SOC Detection
+
+This file contains Splunk search queries (SPL) corresponding to the Sigma rules in the parent folder. These queries can be saved as alerts or notable event creators in Splunk Enterprise or Splunk Cloud.
+
+---
+
+## 1. SSH Brute Force Detection
+
+**Source:** Linux auth logs (e.g., `/var/log/auth.log`)
+
+```splunk
+index=* sourcetype="linux_audit" OR sourcetype="auth.log"
+("Failed password for" OR "Invalid user")
+| stats count by src_ip, user
+| where count > 5
+| rename src_ip as "Source IP", user as "Username", count as "Failed Attempts"
+| sort -"Failed Attempts"
+```
+
+**Alternative (if using syslog):**
+```splunk
+sourcetype="syslog" facility=auth "Failed password"
+| stats count by src
+| where count > 5
+```
+
+---
+
+## 2. Suspicious PowerShell Execution
+
+**Source:** Windows Event ID 4688 with full command line, or Sysmon Event ID 1
+
+```splunk
+index=wineventlog EventCode=4688
+(CommandLine="*-EncodedCommand*" OR CommandLine="*-e *" OR CommandLine="*-Enc *" OR CommandLine="*-c *")
+NOT (CommandLine="*Get-Help*" OR CommandLine="*Set-ExecutionPolicy*" OR CommandLine="*Install-Module*" OR CommandLine="*\\Windows\\System32\\*")
+| table _time, host, user, CommandLine, ParentProcessName
+```
+
+**Sysmon version (preferred):**
+```splunk
+sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=1
+(CommandLine="*-EncodedCommand*" OR CommandLine="*-e *")
+| stats count by Computer, User, CommandLine
+| where count > 0
+```
+
+---
+
+## 3. Pass-the-Hash Lateral Movement
+
+**Source:** Windows Security Event Log ID 4624
+
+```splunk
+index=wineventlog EventCode=4624 Logon_Type=3
+Authentication_Package="NTLM"
+Workstation_Name!="%computername%"
+| table _time, Workstation_Name, Target_UserName, source_ip, Authentication_Package
+| rename Workstation_Name as "Source Workstation", Target_UserName as "Target Account", source_ip as "Source IP"
+```
+
+**Enriched with user info:**
+```splunk
+index=wineventlog EventCode=4624 Logon_Type=3 Authentication_Package="NTLM"
+| lookup user_enrichment user as Target_UserName OUTPUT Department as "Target Dept"
+| where Workstation_Name NOT LIKE "%${computername}%"
+| stats count by Target_UserName, Target Dept, Workstation_Name, source_ip
+| sort -count
+```
+
+---
+
+## 4. Additional Useful Queries
+
+### Unusual Login Time
+Detect logins outside business hours (adjust hours as needed):
+```splunk
+index=wineventlog EventCode=4624
+| eval hour=strftime(_time, "%H")
+| where (hour >= "22" OR hour <= "05")
+| stats earliest(_time) as first_seen, latest(_time) as last_seen by src_ip, user
+```
+
+### Multiple Failed Logons from Single IP (Windows)
+```splunk
+index=wineventlog EventCode=4625
+| stats count by src_ip
+| where count > 10
+```
+
+### New Admin Group Membership
+```splunk
+index=wineventlog EventCode=4728 OR EventCode=4729  # admin group changes
+| table _time, Target_UserName, Member_Name, Status
+```
+
+### PowerShell Download cradle (WebClient)
+```splunk
+index=* sourcetype="powershell" OR EventCode=4688
+CommandLine="*DownloadString*" OR CommandLine="*DownloadFile*" OR CommandLine="*IEX*"
+| table _time, host, CommandLine
+```
+
+---
+
+## ⚙️ Turning Queries into Alerts
+
+1. Save Search → **Schedule** (e.g., "Run every 5 minutes")
+2. **Trigger condition:** "Number of results > 0"
+3. **Actions:**
+   - Send email to SOC
+   - Create notable event (if using ES)
+   - Run a script (e.g., block IP via firewall API)
+4. **Permissions:** Share with `soc_analyst` role
+
+---
+
+## 📈 Performance Notes
+
+- Avoid time ranges like `last 24 hours` in scheduled alerts – use `-15m` relative ranges
+- Pre-filter with `index=` and `sourcetype=` to reduce scan volume
+- Use `tstats` for accelerated data models when available (e.g., `| tstats count from datamodel=Authentication`)
+- Add `| dedup src_ip, user` if you only need one alert per source
+
+---
+
+## 🎯 Alert Triage Priorities (Suggested)
+
+| Rule | Severity | Priority | SLA |
+|------|----------|----------|-----|
+| PtH Lateral Movement | High | P1 | < 15 min |
+| PowerShell Obfuscation | High | P1 | < 30 min |
+| SSH Brute Force | Medium | P2 | < 2 hours |
+
+---
+
+*Last updated: 2026-02-23*
