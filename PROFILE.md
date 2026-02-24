@@ -2,7 +2,7 @@
 
 ## 🧑‍💻 About Me
 
-Security-focused IT professional with hands-on experience in SOC workflows, log analysis, and detection engineering. Combines practical cybersecurity training (TryHackMe, Cisco NetAcad) with frontline customer service experience from Amazon delivery operations. Proven ability to analyze security alerts, investigate anomalies, and communicate findings clearly. Seeking SOC Analyst or IT Field Technician role where systematic troubleshooting and security-minded thinking drive outcomes.
+Security-focused IT professional with hands-on experience in SOC workflows, log analysis, and detection engineering. Combines practical cybersecurity training (TryHackMe, Cisco NetAcad) with frontline customer service experience. Proven ability to analyze security alerts, investigate anomalies, and communicate findings clearly. Seeking SOC Analyst or IT Field Technician role where systematic troubleshooting and security-minded thinking drives outcomes.
 
 ---
 
@@ -71,10 +71,9 @@ See separate folders in this repository:
 
 ## 📞 Contact
 
-- **Email:** [your.email@example.com] *(fill in)*
-- **LinkedIn:** [linkedin.com/in/yourprofile] *(fill in)*
+- **LinkedIn:** https://www.linkedin.com/in/vuln-z-895067322/
 - **TryHackMe:** https://tryhackme.com/p/VulnZ
-- **Location:** [City, State]
+- **Location:** Bel Air, Maryland
 
 ---
 
