@@ -9,7 +9,6 @@ Welcome to my hands-on cybersecurity portfolio. This repository documents my pra
 ## 🚀 Quick Navigation
 
 - **[PROFILE.md](PROFILE.md)** – My professional summary, skill matrix, and career objectives
-- **[QUICKSTART.md](QUICKSTART.md)** – How to set up your own SIEM lab (5 minutes)
 - **[siem-lab/](siem-lab/)** – ELK stack deployment, log ingestion, and detection implementations
 - **[detection-rules/](detection-rules/)** – Sigma rules and SIEM queries for real-world attacks
 - **[tryhackme/](tryhackme/)** – Detailed write-ups of key THM rooms and lessons learned
