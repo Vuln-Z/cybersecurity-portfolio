@@ -151,17 +151,6 @@ Recommendation: Block source IP at firewall, monitor for credential stuffing
 
 ---
 
-## 📸 Screenshots
-
-*(Placeholder – to add)*
-
-- [ ] SOC Simulations room completion badge
-- [ ] 100% True Positive Rate badge
-- [ ] Sample SIEM investigation timeline
-- [ ] Example incident report (from room)
-
----
-
 *These simulations validated my alert triage methodology. Now I can approach real SOC alerts with confidence.*
 
 *Related artifacts: detection rules in `../detection-rules/`, SIEM lab in `../siem-lab/`.*
