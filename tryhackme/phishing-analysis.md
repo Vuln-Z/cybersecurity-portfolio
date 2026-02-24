@@ -177,17 +177,6 @@ Recommended Action: Block domain/IP at Gateway, user notification, password rese
 
 ---
 
-## 📸 Screenshots
-
-*(Placeholder – add actual room completion screenshots)*
-
-- [ ] Phishing Analysis Fundamentals badge
-- [ ] Phishing Emails in Action badge
-- [ ] Sample header analysis showing spoofed origin
-- [ ] IOC extraction spreadsheet template
-
----
-
 *Next: Apply this skill in a real environment – practice on user-reported emails if possible. Build a standard report template (see IOC extraction above) for SOC ticket creation.*
 
 *Related artifacts: detection rules for phishing links in `../detection-rules/`.*
